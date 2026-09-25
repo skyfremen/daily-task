@@ -35,14 +35,15 @@ export function readConfig(env = process.env) {
 }
 
 export function classifyPageText(text) {
-  const normalized = String(text ?? "").toLowerCase();
-
-  if (normalized.includes(SUCCESS_MARKER)) {
-    return "success";
-  }
+  const raw = String(text ?? "");
+  const normalized = raw.toLowerCase();
 
   if (HUMAN_VERIFICATION_MARKERS.some((marker) => normalized.includes(marker))) {
     return "human_verification";
+  }
+
+  if (/(^|\n)\s*\$3\.99 exchange\s*(\n|$)/i.test(raw)) {
+    return "success";
   }
 
   if (
@@ -73,6 +74,7 @@ async function runClaim({ phone, voucherUrl }) {
     }
 
     const phoneInput = page.getByPlaceholder("Mobile Number");
+    await phoneInput.waitFor({ state: "visible", timeout: 15000 });
     if ((await phoneInput.count()) !== 1) {
       throw new ClaimError("Luckin phone-number field was not found");
     }
@@ -91,10 +93,21 @@ async function runClaim({ phone, voucherUrl }) {
       throw new ClaimError("Luckin voucher button was not found");
     }
 
-    await submitButton.click();
-    await page.waitForTimeout(2500);
+    if (classifyPageText(await page.locator("body").innerText()) === "human_verification") {
+      throw new ClaimError("Luckin requires human verification");
+    }
 
-    const result = classifyPageText(await page.locator("body").innerText());
+    await submitButton.click();
+
+    let result = "unknown";
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      result = classifyPageText(await page.locator("body").innerText());
+      if (result === "success" || result === "human_verification") {
+        break;
+      }
+      await page.waitForTimeout(500);
+    }
+
     if (result === "success") {
       return { status: "success" };
     }
