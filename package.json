@@ -1,0 +1,15 @@
+{
+  "name": "daily-task",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dry-run": "node src/claim-luckin-voucher.mjs --dry-run",
+    "claim": "node src/claim-luckin-voucher.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.55.0"
+  }
+}
