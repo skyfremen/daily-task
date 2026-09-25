@@ -1,5 +1,3 @@
-import { chromium } from "playwright";
-
 export const VOUCHER_URL =
   "https://in.luckincoffee.com/activity/getCoupon?sendCouponWebConfigNo=LKSG118175131058651136&tenant=LKSG&marketingCode=LKSGMK118175121864736768";
 
@@ -59,6 +57,7 @@ export function classifyPageText(text) {
 }
 
 async function runClaim({ phone, voucherUrl }) {
+  const { chromium } = await import("playwright");
   const browser = await chromium.launch({ headless: true });
 
   try {
