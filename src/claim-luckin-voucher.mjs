@@ -79,9 +79,14 @@ async function runClaim({ phone, voucherUrl }) {
 
     await phoneInput.fill(phone);
 
-    const submitButton = page.getByRole("button", {
+    let submitButton = page.getByRole("button", {
       name: "Get $3.99 Exchange Voucher"
     });
+    if ((await submitButton.count()) === 0) {
+      submitButton = page.getByText("Get $3.99 Exchange Voucher", {
+        exact: true
+      });
+    }
     if ((await submitButton.count()) !== 1) {
       throw new ClaimError("Luckin voucher button was not found");
     }
