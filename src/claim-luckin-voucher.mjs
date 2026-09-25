@@ -1,7 +1,6 @@
 export const VOUCHER_URL =
   "https://in.luckincoffee.com/activity/getCoupon?sendCouponWebConfigNo=LKSG118175131058651136&tenant=LKSG&marketingCode=LKSGMK118175121864736768";
 
-const SUCCESS_MARKER = "$3.99 exchange";
 const HUMAN_VERIFICATION_MARKERS = [
   "captcha",
   "human verification",
@@ -85,10 +84,11 @@ async function runClaim({ phone, voucherUrl }) {
       name: "Get $3.99 Exchange Voucher"
     });
     if ((await submitButton.count()) === 0) {
-      submitButton = page.getByText("Get $3.99 Exchange Voucher", {
-        exact: true
-      });
+      submitButton = page.getByText(
+        /Get\s+\$3\.99\s+Exchange\s+Voucher/i
+      );
     }
+    await submitButton.first().waitFor({ state: "visible", timeout: 15000 });
     if ((await submitButton.count()) !== 1) {
       throw new ClaimError("Luckin voucher button was not found");
     }
