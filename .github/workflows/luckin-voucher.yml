@@ -2,7 +2,7 @@ name: Daily Luckin Voucher
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "7 0 * * *"
   workflow_dispatch:
 
 permissions:
