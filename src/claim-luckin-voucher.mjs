@@ -1,3 +1,6 @@
+import { mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+
 export const VOUCHER_URL =
   "https://in.luckincoffee.com/activity/getCoupon?sendCouponWebConfigNo=LKSG118175131058651136&tenant=LKSG&marketingCode=LKSGMK118175121864736768";
 
@@ -29,7 +32,10 @@ export function readConfig(env = process.env) {
   return {
     phone,
     voucherUrl: VOUCHER_URL,
-    dryRun: process.argv.includes("--dry-run") || env.DRY_RUN === "1"
+    dryRun: process.argv.includes("--dry-run") || env.DRY_RUN === "1",
+    screenshotPath:
+      String(env.VOUCHER_SCREENSHOT_PATH ?? "").trim() ||
+      "artifacts/voucher-success.png"
   };
 }
 
@@ -56,7 +62,7 @@ export function classifyPageText(text) {
   return "unknown";
 }
 
-async function runClaim({ phone, voucherUrl }) {
+async function runClaim({ phone, voucherUrl, screenshotPath }) {
   const { chromium } = await import("playwright");
   const browser = await chromium.launch({ headless: true });
 
@@ -109,7 +115,13 @@ async function runClaim({ phone, voucherUrl }) {
     }
 
     if (result === "success") {
-      return { status: "success" };
+      await mkdir(dirname(screenshotPath), { recursive: true });
+      await page.screenshot({
+        path: screenshotPath,
+        fullPage: true,
+        mask: [phoneInput]
+      });
+      return { status: "success", screenshotPath };
     }
 
     if (result === "human_verification") {
@@ -133,7 +145,7 @@ async function main() {
   console.log("opening voucher page");
   const result = await runClaim(config);
   if (result.status === "success") {
-    console.log("voucher success detected");
+    console.log(`voucher success detected; screenshot saved to ${result.screenshotPath}`);
   }
 }
 
