@@ -2,7 +2,8 @@ name: Daily Luckin Voucher
 
 on:
   schedule:
-    - cron: "9 18 * * *"
+    - cron: "7 2 * * *"
+      timezone: "Asia/Singapore"
   workflow_dispatch:
 
 permissions:
