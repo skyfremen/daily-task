@@ -28,16 +28,8 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Claim voucher
+      - name: Claim vouchers
         env:
           LUCKIN_PHONE: ${{ secrets.LUCKIN_PHONE }}
-          VOUCHER_SCREENSHOT_PATH: artifacts/voucher-success.png
+          LUCKIN_PHONE_2: ${{ secrets.LUCKIN_PHONE_2 }}
         run: npm run claim
-
-      - name: Upload voucher screenshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: luckin-voucher-screenshot-${{ github.run_number }}
-          path: artifacts/voucher-success.png
-          if-no-files-found: error
-          retention-days: 30
